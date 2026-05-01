@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p src src/data src/models src/training src/utils configs results _memory GUIDE tests data)",
+      "Bash(touch src/__init__.py src/data/__init__.py src/models/__init__.py src/training/__init__.py src/utils/__init__.py tests/__init__.py)",
+      "Bash(python tests/test_sae_smoke.py)",
+      "Bash(python -c \"import torch, transformers; print\\('torch:', torch.__version__, 'cuda:', torch.cuda.is_available\\(\\)\\); print\\('transformers:', transformers.__version__\\)\")",
+      "Bash(python src/models/qwen_loader.py --hook-layer 12 --text \"你好世界。Hello world.\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \"import transformers; print\\('transformers:', transformers.__version__\\); from transformers import AutoConfig; c = AutoConfig.from_pretrained\\('Qwen3.5-0.8B', trust_remote_code=True\\); print\\('arch:', c.architectures\\); print\\('text hidden_size:', c.text_config.hidden_size, 'num_layers:', c.text_config.num_hidden_layers\\)\")",
+      "Bash(python src/train.py --config configs/train_topk_smoke.yaml --tag smoke --max-iters 1)",
+      "Bash(python src/train.py --config configs/train_topk_smoke.yaml --tag smoke)",
+      "Bash(python src/train.py --config configs/train_topk_smoke.yaml --tag smoke --resume --max-epochs 4)"
+    ]
+  }
+}

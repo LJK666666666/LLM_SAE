@@ -1,0 +1,20 @@
+大型语言模型的可解释性研究是机器学习领域的重要方向之一。
+Sparse Autoencoders provide a way to decompose neural network activations into interpretable features.
+通过在残差流上训练稀疏自编码器，我们可以发现模型内部的可解释概念。
+The TopK SAE introduced by OpenAI directly enforces L0 sparsity through a top-k operation.
+JumpReLU SAEs use learned thresholds with straight-through gradient estimation.
+Qwen 是阿里巴巴推出的大语言模型系列，包含多个尺寸的开源模型。
+Mechanistic interpretability aims to reverse-engineer the algorithms learned by neural networks.
+本项目针对 Qwen3.5-0.8B 多模态模型的语言部分训练 SAE，钩取第 12 层残差流激活。
+Feature directions in the SAE dictionary often correspond to monosemantic concepts.
+Anthropic、DeepMind 和 OpenAI 都发表了重要的 SAE 相关研究。
+The dictionary size is typically 8 to 64 times the model hidden size.
+中英双语预训练让 Qwen 在多语言任务上表现良好。
+Hook position matters: residual stream features differ qualitatively from MLP output features.
+我们使用 streaming 数据加载以处理大规模语料而不超出内存。
+Dead features can be revived using auxiliary losses on reconstruction residuals.
+通过监控 L0、explained variance 和 dead feature 比例来评估 SAE 训练效果。
+The bandwidth parameter in JumpReLU controls the rectangular kernel width for STE.
+项目代码统一保存训练产物到 results 文件夹下，便于复现和对比实验。
+Cross-lingual SAE features may emerge when training on bilingual data.
+Reconstruction loss measured in MSE provides a baseline; explained variance is normalized.

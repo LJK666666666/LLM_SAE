@@ -1,0 +1,4 @@
+exp_dir,tag,variant,hook_layer,d_in,d_sae,k,lr,steps_per_epoch,n_params_sae_M,elapsed_s,summary.mode,summary.iters,summary.best_val_loss,summary.final_epoch,summary.final_lr,summary.history_len,final.val_recon,final.val_l0,final.val_expl_var,final.lr
+results/smoke_1,smoke,topk,12,1024,2048,16,0.0003,5,4.197,26.2,max_iters_smoke_test,1.0,,,,,,,,
+results/smoke_2,smoke,topk,12,1024,2048,16,0.0003,5,4.197,76.8,,,4.084352493286133,4.0,0.0003,5.0,4.084352493286133,16.0,0.2407659888267517,0.0003
+results/smoke_3,smoke,topk,12,1024,2048,16,0.0003,5,4.197,82.6,,,4.411673307418823,5.0,0.0003,4.0,4.411673307418823,16.0,0.20003622770309448,0.0003

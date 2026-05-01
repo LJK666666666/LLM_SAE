@@ -1,0 +1,49 @@
+# TopK SAE 本地固定子集训练配置
+# 先运行 src/data/download_subset.py 生成 data/local_corpus/fineweb_edu_subset/*
+
+model:
+  model_dir: Qwen3.5-0.8B
+  hook_layer: 12
+  dtype: bfloat16
+  device: cuda
+
+sae:
+  variant: topk
+  d_in: 1024
+  d_sae: 16384
+  k: 32
+  k_aux: 256
+  aux_loss_coef: 0.03125
+  dead_steps_threshold: 1000
+  normalize_decoder: true
+
+corpus:
+  local_en_train_path: data/local_corpus/fineweb_edu_subset/train_en.jsonl
+  local_zh_train_path: data/local_corpus/fineweb_edu_subset/train_zh.jsonl
+  local_en_val_path: data/local_corpus/fineweb_edu_subset/val_en.jsonl
+  local_zh_val_path: data/local_corpus/fineweb_edu_subset/val_zh.jsonl
+  local_text_col: text
+  en_ratio: 0.5
+  cache_dir: data/cache
+
+activation_store:
+  sae_batch_size: 4096
+  buffer_size_tokens: 524288
+  refill_threshold: 0.5
+  ctx_len: 512
+  model_batch_size: 8
+
+trainer:
+  lr: 3.0e-4
+  weight_decay: 0.0
+  betas: [0.9, 0.999]
+  grad_clip: 1.0
+  steps_per_epoch: 1000
+  val_steps: 50
+  max_epochs: 200
+  lr_decay_factor: 0.7
+  lr_patience_epochs: 3
+  early_stop_lr_patience_epochs: 15
+  seed: 0
+  grad_accum: 1
+  save_every_steps: 100

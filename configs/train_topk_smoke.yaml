@@ -1,0 +1,41 @@
+# 烟雾测试用：极小数据 + 极小缓冲，配合 --max-iters 1 快速跑通
+model:
+  model_dir: Qwen3.5-0.8B
+  hook_layer: 12
+  dtype: bfloat16
+  device: auto
+
+sae:
+  variant: topk
+  d_in: 1024
+  d_sae: 2048
+  k: 16
+  k_aux: 64
+  aux_loss_coef: 0.03125
+  dead_steps_threshold: 100
+  normalize_decoder: true
+
+corpus:
+  use_local_txt: data/smoke_text.txt   # 完全离线，不依赖 datasets/HF
+  cache_dir: data/cache
+
+activation_store:
+  sae_batch_size: 256
+  buffer_size_tokens: 4096
+  refill_threshold: 0.5
+  ctx_len: 128
+  model_batch_size: 2
+
+trainer:
+  lr: 3.0e-4
+  weight_decay: 0.0
+  betas: [0.9, 0.999]
+  grad_clip: 1.0
+  steps_per_epoch: 5
+  val_steps: 2
+  max_epochs: 2
+  lr_decay_factor: 0.7
+  lr_patience_epochs: 3
+  early_stop_lr_patience_epochs: 15
+  seed: 0
+  grad_accum: 1

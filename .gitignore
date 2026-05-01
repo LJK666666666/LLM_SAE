@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Project artifacts
+results/*/
+!results/.gitkeep
+data/cache/
+data/activations/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# But keep model dir hierarchy / model itself separately managed
+Qwen3.5-0.8B/*.safetensors
+Qwen3.5-0.8B/
+
+data/local_corpus
