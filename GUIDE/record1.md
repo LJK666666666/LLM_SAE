@@ -1,0 +1,1 @@
+5070ti ~20+min/epoch

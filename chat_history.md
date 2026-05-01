@@ -132,3 +132,24 @@
 - 增加本地子集版恢复训练、调参训练、提高 `save_every_steps` 的命令。
 - 增加 Colab/云端推荐命令：数据下载到 `/content` 附近本地盘 `../data/fineweb_edu_subset`，实验结果通过 `--results-root ../drive/MyDrive/results` 保存到 Drive。
 - 保留直接 HF streaming 训练作为短跑/调试备选，并明确训练期间仍依赖 HF streaming。
+
+## 2026-05-01 #2
+
+**用户**：询问训练瓶颈更可能在显存带宽、计算速度还是其他部分。
+
+**分析要点**：
+- 训练分两段：`ActivationStore._refill()` 先用 Qwen3.5 前向批量采集激活；随后 `SAETrainer._train_epoch()` 对缓存激活训练 SAE。
+- Qwen 取激活大概率是首要瓶颈，尤其日志显示缺少 `flash-linear-attention` / `causal-conv1d`，Qwen3.5 fast path 不可用，退回 torch 实现。
+- TopK SAE 也有显著计算和显存带宽压力：当前 `z` 是 dense `[sae_batch_size, d_sae]`，默认 `[4096, 16384]`；encoder/decoder 都是 dense matmul，topk/scatter 也会读写大张量。
+- 数据读取在改成本地固定子集后通常不是主瓶颈；网络 streaming 只会在直接 HF streaming 模式下成为稳定性/I/O 风险。
+- 建议用阶段计时或 profiler 分别统计 `_refill()` 时间、`next(train_store)` 非 refill 时间、SAE step 时间，再决定优化方向。
+
+## 2026-05-01 #3
+
+**用户**：询问如何安装 Qwen3.5 fast path 依赖；云端显存 13.8/40GB、可用 80GB 时如何设置 `model_batch_size`；dense decoder 与 sparse decode 的区别；`buffer_size_tokens` 的含义。
+
+**回答要点**：
+- `flash-linear-attention` 官方当前要求 PyTorch >=2.7、Triton >=3.3、einops、transformers、datasets；可用 `pip install flash-linear-attention` 安装。新版 FLA README 提到已提供 Triton conv1d，`causal-conv1d` 不再是必需项，但 transformers 警告仍可能提到它，可按需 `pip install causal-conv1d`。
+- `model_batch_size` 是每次送入 Qwen 前向取激活的文本条数，近似控制一次 forward 的 token 数 `model_batch_size * ctx_len`。40GB 建议从 16 开始试，稳定后 24/32；80GB 建议 32 起步，稳定后 48/64。
+- dense decoder 当前把 TopK 激活 `z` 存成 `[B, d_sae]` dense 张量再 matmul；sparse decode 只保留 top-k indices/values，用选中的 decoder 行加权求和，理论上减少内存和 decoder 计算，但实现复杂，且 encoder/pre/topk 仍是 dense。
+- `buffer_size_tokens` 是 activation buffer 中缓存的 token 激活数量，默认 524288；显存约为 `buffer_size_tokens * d_in * bytes_per_elem`，bf16 + d_in=1024 时单个 store 约 1GB。大 buffer 提升打乱质量、减少 refill 频率，但增加显存占用和 shuffle/cat 峰值。

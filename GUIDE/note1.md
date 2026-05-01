@@ -140,3 +140,165 @@ python src/train.py --config ../data/fineweb_edu_subset/train_config_local.yaml 
   LocalTextFileStream('data/smoke_text.txt') 轻量读取
 
   我没有实际下载大子集，避免在当前环境里长时间占用网络和磁盘。
+
+
+
+• 1. 安装 Qwen3.5 fast path 依赖
+
+  在云端先确认 PyTorch / CUDA：
+
+  python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.get_device_name(0))"
+
+  然后优先装 FLA：
+
+  pip install flash-linear-attention
+
+  如果已经装过旧版，建议：
+
+  pip uninstall -y fla-core flash-linear-attention
+  pip install -U flash-linear-attention
+
+  如果还是看到 causal-conv1d 相关警告，再装：
+
+  pip install causal-conv1d
+
+  官方 FLA 当前说明里，flash-linear-attention 新版本已经提供 Triton conv1d，所以 causal-conv1d 不再总是必需。但 transformers 的 Qwen3.5 fast path 警告可
+  能仍会提到它，所以可以按需装。
+
+  验证：
+
+  python -c "import fla; print('fla ok')"
+  python -c "import causal_conv1d; print('causal_conv1d ok')"
+
+  参考：
+
+  - https://github.com/fla-org/flash-linear-attention
+  - https://github.com/Dao-AILab/causal-conv1d
+
+  2. 40GB / 80GB 显存怎么设 model_batch_size
+
+  model_batch_size 在这里指每次送入 Qwen 前向的文本条数：
+
+  activation_store:
+    ctx_len: 512
+    model_batch_size: 8
+
+  一次 Qwen forward 的最大 token 数大约是：
+
+  model_batch_size * ctx_len
+
+  你现在云端显示：
+
+  13.8 / 40.0 GB
+
+  说明还有余量。建议：
+
+  40GB：
+
+  model_batch_size: 16
+
+  稳定后试：
+
+  model_batch_size: 24
+  # 或
+  model_batch_size: 32
+
+  80GB：
+
+  model_batch_size: 32
+
+  稳定后试：
+
+  model_batch_size: 48
+  # 或
+  model_batch_size: 64
+
+  判断标准：
+
+  如果 Qwen refill 阶段 OOM：降低 model_batch_size
+  如果显存稳定但 GPU 利用率不高：提高 model_batch_size
+  如果 SAE 阶段慢：提高 model_batch_size 帮助有限
+
+  修改位置：
+
+  # configs/train_topk.yaml
+  # 或 data/local_corpus/.../train_config_local.yaml
+
+  activation_store:
+    model_batch_size: 16
+
+  3. dense decoder vs sparse decode
+
+  你现在的 TopK SAE 是 dense 实现。
+
+  虽然每个 token 只激活 k=32 个 feature，但代码里 z 是完整 dense 张量：
+
+  z: [4096, 16384]
+
+  然后做：
+
+  x_hat = z @ W_dec
+
+  这叫 dense decoder。优点是实现简单，GPU matmul 很成熟。缺点是大量 0 也参与内存读写和矩阵乘法。
+
+  sparse decode 的思路是只保存 top-k：
+
+  indices: [4096, 32]
+  values:  [4096, 32]
+
+  然后只取被激活的 decoder 行：
+
+  x_hat = sum(values_i * W_dec[indices_i])
+
+  理论优势：
+
+  z 内存从 B*d_sae 降到 B*k
+  decoder 计算从 B*d_sae*d_in 降到 B*k*d_in
+
+  但注意：
+
+  encoder pre-activation 仍然要算 dense [B, d_sae]
+  topk 仍然要在 dense pre 上做
+  反向传播和 aux loss 会更复杂
+  PyTorch 原生 gather/scatter 未必比 dense matmul 快
+
+  所以 sparse decode 值得做，但不是一行改动。它主要优化 decoder 和 z 的显存/带宽，不会消除 encoder 的 dense 计算。
+
+  4. buffer_size_tokens 是什么
+
+  它是 activation buffer 里缓存多少个 token 的 hidden state。
+
+  当前默认：
+
+  buffer_size_tokens: 524288
+  d_in: 1024
+  dtype_storage: bfloat16
+
+  单个 buffer 显存约：
+
+  524288 * 1024 * 2 bytes ≈ 1.0 GB
+
+  训练集 store 和验证集 store 都可能占显存，所以实际可能接近 2GB，再加上 shuffle / cat 的临时峰值。
+
+  它的作用：
+
+  大 buffer：打乱更充分，batch 相关性更低，refill 次数少，但更占显存
+  小 buffer：更省显存，refill 更频繁，样本相关性略高
+
+  40GB 推荐先保持：
+
+  buffer_size_tokens: 524288
+  model_batch_size: 16
+
+  如果显存峰值不稳：
+
+  buffer_size_tokens: 262144
+  model_batch_size: 16
+
+  如果 80GB 且训练稳定，可以试：
+
+  buffer_size_tokens: 1048576
+  model_batch_size: 32
+
+  但我会优先调 model_batch_size，因为它更直接影响 Qwen 取激活吞吐；buffer_size_tokens 更多影响 refill 频率、打乱质量和显存峰值。
+

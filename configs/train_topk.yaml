@@ -36,7 +36,7 @@ activation_store:
   buffer_size_tokens: 524288
   refill_threshold: 0.5
   ctx_len: 512
-  model_batch_size: 8
+  model_batch_size: 24
 
 trainer:
   lr: 3.0e-4
