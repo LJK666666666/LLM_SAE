@@ -5,3 +5,6 @@
 代码的内存请求是否稳定？之前出现内存问题更可能是代码的问题还是外部环境的问题？
 
 我想将代码库放到云端运行并将实验结果保存路径设置为 /content/drive/MyDrive/results 或者 ../drive/MyDrive/results 下面，如何设置？
+
+请你测试一下 `results\topk_l12_local_2\best.pt` 训练好的模型权重的效果
+

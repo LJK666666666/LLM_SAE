@@ -30,3 +30,10 @@ Qwen3.5-0.8B/*.safetensors
 Qwen3.5-0.8B/
 
 data/local_corpus
+
+*.zip
+
+GUIDE/
+CLAUDE.md
+chat_history.md
+

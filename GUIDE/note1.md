@@ -302,3 +302,172 @@ python src/train.py --config ../data/fineweb_edu_subset/train_config_local.yaml 
 
   但我会优先调 model_batch_size，因为它更直接影响 Qwen 取激活吞吐；buffer_size_tokens 更多影响 refill 频率、打乱质量和显存峰值。
 
+
+• 这是因为 fla 和 causal_conv1d 是两个不同包。
+
+  你现在状态是：
+
+  flash-linear-attention / fla: 已安装
+  causal-conv1d: 未安装
+
+  但 Hugging Face transformers 里的 Qwen3.5 fast path 判定很可能要求两类东西都可用：
+
+  FLA 的 gated delta rule kernel
+  causal_conv1d 的 causal conv1d kernel
+
+  所以即使：
+
+  python -c "import fla; print('fla ok')"
+
+  成功，只要：
+
+  python -c "import causal_conv1d"
+
+  失败，transformers 仍会提示：
+
+  fast path is not available
+
+  这里有一个版本差异点：FLA 官方文档现在说新版 flash-linear-attention 已提供 Triton conv1d，所以 对 FLA 本身 causal-conv1d 不再总是必需。但 transformers
+  的 Qwen3.5 实现仍然会提示并检查 causal-conv1d 相关路径，所以你这里仍需要装它。
+
+  在 Colab / Linux 云端先试：
+
+  pip install causal-conv1d
+
+  然后验证：
+
+  python -c "from causal_conv1d import causal_conv1d_fn; print('causal_conv1d ok')"
+
+  如果 PyPI 安装失败，用源码安装：
+
+pip install ninja packaging
+pip install git+https://github.com/Dao-AILab/causal-conv1d.git --no-build-isolation
+
+  如果仍失败，先看环境：
+
+  python -c "import torch; print(torch.__version__, torch.version.cuda)"
+  nvcc --version
+
+  常见原因是云端环境没有 CUDA 编译工具链，或者 PyTorch / CUDA / Python 版本没有匹配 wheel。
+
+  装好后重启 Python 运行时，再重新跑：
+
+python -c "import fla; print('fla ok')"
+python -c "from causal_conv1d import causal_conv1d_fn; print('causal_conv1d ok')"
+
+  再跑训练。如果警告消失，就说明 fast path 生效了。
+
+  参考：
+
+  - FLA 安装说明：https://github.com/fla-org/flash-linear-attention
+  - causal-conv1d：https://github.com/Dao-AILab/causal-conv1d
+
+
+
+• 可以手动停，而且现在停是合理的。
+
+  你当前已经到：
+
+  best 大概在 epoch 57:
+  val_recon ≈ 0.8360
+  expl_var ≈ 0.8083
+
+  后面：
+
+  epoch 58: val_recon=0.8389
+  epoch 59: val_recon=0.8394
+  epoch 60: val_recon=0.8406
+  epoch 61: val_recon=0.8393
+
+  已经基本平台期，甚至略回升。继续训练的收益很小。
+
+  怎么停
+
+  如果现在还在跑，直接在终端按：
+
+  Ctrl+C
+
+  可以。
+
+  但最好等当前 epoch 的 val 完成并保存 last.pt 后再停。你现在显示：
+
+  val: 46% 23/50
+
+  建议等它跑完这一轮 val，看到类似：
+
+  [epoch  61] ...
+
+  以及保存完成后再 Ctrl+C。不过你已经有之前 epoch 的 last.pt / best.pt，即使现在 Ctrl+C，最多丢掉当前 epoch 61 的部分验证，不会丢掉前面训练结果。
+
+  后续用哪个权重
+
+  优先用：
+
+  best.pt
+
+  不是 last.pt。
+
+  因为当前已经平台期，best.pt 应该保存了验证重构最低的版本，大概在 epoch 57 附近。
+
+  你的结果可以认为训练成功：
+
+  l0=32.0
+  expl_var≈0.808
+  val_recon 从 1.0387 降到 0.836 左右
+
+  已经是一版可用 TopK SAE。
+
+  下一步建议不是继续硬训，而是：
+
+  1. 用 best.pt 做特征分析
+  2. 做 SAE 重构替换评估 / KL 评估
+  3. 可视化 loss / expl_var 曲线
+  4. 如果想提升质量，再扫 d_sae 或 k
+
+  结论：可以提前停。最好等当前 val 结束保存后停；急的话现在 Ctrl+C 也可以，已有 best.pt。
+
+
+● 新环境搭建 + 完整评估完成
+
+  环境：llm_sae (Python 3.11)
+  - torch 2.11.0+cu128（支持 RTX 5070 Ti Laptop / sm_120 Blackwell）
+  - triton-windows 3.7.0.post26
+  - flash-linear-attention 0.5.0
+  - transformers 5.8.1（已支持 qwen3_5）
+  - datasets / pandas / matplotlib / accelerate
+  
+  │        指标        │     mix     │     en      │     zh      │
+  ├────────────────────┼─────────────┼─────────────┼─────────────┤
+  │ Explained Variance │ 0.8054      │ 0.7960      │ 0.8071      │
+  ├────────────────────┼─────────────┼─────────────┼─────────────┤
+  │ Cosine Sim         │ 0.9272      │ 0.9238      │ 0.9312      │
+  ├────────────────────┼─────────────┼─────────────┼─────────────┤
+  │ L0                 │ 32.0        │ 32.0        │ 32.0        │
+  ├────────────────────┼─────────────┼─────────────┼─────────────┤
+  │ Dead feat frac     │ 0.31%       │ 3.31%       │ 0.94%       │
+  ├────────────────────┼─────────────┼─────────────┼─────────────┤
+  │ 活跃特征数         │ 16334/16384 │ 15841/16384 │ 16230/16384 │
+  └────────────────────┴─────────────┴─────────────┴─────────────┘
+
+  下游影响（CE / KL 替代损失，mix）
+  - CE：原始 2.9658 → SAE 替代 3.1513（+0.186）→ 零消融 12.4225（+9.46）
+  - CE 恢复率 = 98.04%（替代后保留下游 ~98% 的可用信息，业界 SAE 通常 95–99%）
+  - KL(sae‖orig) = 0.18 vs KL(zero‖orig) = 9.83
+
+  判断：这个 SAE 训练得不错——
+  - 重构 0.80 expl_var + L0=32 / d_sae=16384，达到 SAELens / OpenAI 同规模 TopK SAE 报告区间
+  - 98% CE 恢复率是关键证据：把 L12 残差流替成 SAE 重构，几乎不损失下游能力
+  - 中英文两语种表现接近（zh 反而略好一点；en 死特征略多 3.3% 但仍极少）
+  - L0 严格卡在 k=32 ✓，几乎无 dead feature ✓
+
+  生成文件
+  - results/topk_l12_local_2/eval/{eval_metrics.json, eval_summary.txt, feature_density.json}
+  - results/topk_l12_local_2/figures/{loss_curves, l0_curve, explained_var, lr_curve, dead_frac, feature_density_hist}.png
+
+  后续在本地用此环境直接 D:\020_Software\M\miniconda\Miniconda3\envs\llm_sae\python.exe src/... 或 conda activate llm_sae 即可。
+
+  1. 按 CLAUDE.md 规则 19 把这段工作追加到 chat_history.md，并把新 conda env 配方写入 _memory/user.md
+  2. 训 / 评 JumpReLU 变体（变量改 sae.variant=jumprelu，复用同一 hook_layer=12 配置）
+  3. 特征可解释性分析（取激活最强的 top-N 特征，跑文本归因，找语义聚簇）
+  4. 把评估结果汇总进 results/overall_config_metrics.{csv,json}（目前那里只有 3 条 smoke 记录，缺 topk_l12_local_2）
+
