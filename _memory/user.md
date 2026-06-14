@@ -1,13 +1,18 @@
 # 给用户的关键信息（请优先阅读）
 
 > 本文件汇总：(1) 主要运行命令；(2) 配置/参数所在位置；(3) Claude 代我做出的开放性决策（你应当审阅）；(4) 环境陷阱与已知风险。
-> 索引位置：[`_memory/index.md`](index.md)。其他详细记忆：[`design_decisions.md`](design_decisions.md) / [`architecture.md`](architecture.md) / [`naming_conventions.md`](naming_conventions.md) / [`progress.md`](progress.md)。
+> 索引位置：[`_memory/index.md`](index.md)。其他详细记忆：[`design_decisions.md`](design_decisions.md) / [`architecture.md`](architecture.md) / [`naming_conventions.md`](naming_conventions.md) / [`progress.md`](progress.md) / [`environment_recipe.md`](environment_recipe.md) / [`cross_lingual_paper.md`](cross_lingual_paper.md)。
 
 ---
 
 ## 0. 项目信息
 
 - 作者：966279
+- **当前活跃 conda env**：`llm_sae`（Python 3.11，支持 RTX 5070 Ti Laptop / Blackwell sm_120）
+  - 调用路径：`D:/020_Software/M/miniconda/Miniconda3/envs/llm_sae/python.exe`
+  - 或 `conda activate llm_sae` 后用 `python`
+  - 详细配方见 [`environment_recipe.md`](environment_recipe.md)
+- **TexLive 2025**：`pdflatex` / `bibtex` 已在 PATH，paper 编译开箱即用
 
 ## 1. 主要运行命令（执行路径=项目根）
 
@@ -92,6 +97,40 @@ python src/train.py --config configs/train_jumprelu.yaml --tag jumprelu_l12
 ### 1.6 单文件最小验证（只验证 Qwen 加载 + hook）
 ```bash
 python src/models/qwen_loader.py --hook-layer 12 --text "你好。Hello."
+```
+
+### 1.7 SAE 评估（已实现，CE/KL substitution loss）
+```powershell
+D:/020_Software/M/miniconda/Miniconda3/envs/llm_sae/python.exe `
+  src/evaluate.py --exp-dir results/topk_l12_local_2 --ckpt best.pt `
+  --n-batches 50 --n-sub-batches 20 --sub-batch-size 2 --sae-batch-size 2048
+```
+输出：`<exp_dir>/eval/{eval_metrics.json, eval_summary.txt, feature_density.json}`。
+支持 `--ckpt-only` fallback（环境装不上 fla 时仅基于 ckpt + history.csv 出指标）。
+
+### 1.8 训练曲线 + 特征密度可视化
+```powershell
+D:/020_Software/M/miniconda/Miniconda3/envs/llm_sae/python.exe `
+  src/visualize_training.py --exp-dir results/topk_l12_local_2
+```
+输出 6 张 PNG 到 `<exp_dir>/figures/`。
+
+### 1.9 跨语言 SAE 心理学实验（完整 4 阶段，参考 [`cross_lingual_paper.md`](cross_lingual_paper.md)）
+```powershell
+$P = "D:/020_Software/M/miniconda/Miniconda3/envs/llm_sae/python.exe"
+& $P src/psych/crosslingual_features.py --sae-exp-dir results/topk_l12_local_2 --ckpt best.pt
+& $P src/psych/analyze_universal_features.py --sae-exp-dir results/topk_l12_local_2 --ckpt best.pt --xling-dir results/crosslingual_3 --topk-features 30
+& $P src/psych/crosslingual_steering.py --sae-exp-dir results/topk_l12_local_2 --ckpt best.pt --xling-dir results/crosslingual_3 --top-feature-rank 3 --alphas "0,4,12,30" --max-new-tokens 25
+& $P src/psych/plot_crosslingual.py --xling-dir results/crosslingual_3
+```
+
+### 1.10 LaTeX 论文编译
+```powershell
+cd paper
+pdflatex -interaction=nonstopmode main.tex
+bibtex main
+pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
 ```
 
 ---
@@ -224,11 +263,17 @@ Falling back to torch implementation.
 
 ## 5. 待用户决策的开放性问题（按优先级）
 
-1. **正式训练的字典维度 d_sae**：默认 16384（16x），是否要试 32768（32x，特征更细）或 8192（8x，更密集）？
-2. **训练规模**：默认 max_epochs=200 ≈ 800M token；SAE 文献常用 1B~10B token，你能接受多长训练？
-3. **JumpReLU 的 sparsity_coef**：默认 1e-3 是 DeepMind 论文起点，但要根据 d_sae 规模调；通常需要扫 1e-4 ~ 1e-2。
-4. **是否要写评估脚本**：`src/evaluate.py` 计算 KL substitution（用 SAE 重构替换原激活后看 logits KL），是 SAE 质量金标准。当前未写。
-5. **是否要写可视化**：从 `results/overall_config_metrics.csv` 出 loss/L0 对比图，方便扫超参。当前未写。
+1. **正式训练的字典维度 d_sae**：默认 16384（16x），是否要试 32768（32x，特征更细）或 8192（8x，更密集）？topk_l12_local_2 已用 16x 跑出 CE 恢复率 98.04%，再放大可能边际效益递减。
+2. **训练规模**：默认 max_epochs=200 ≈ 800M token；SAE 文献常用 1B~10B token，你能接受多长训练？topk_l12_local_2 已 63 epoch（约 250M token）成功收敛。
+3. **JumpReLU 的 sparsity_coef**：默认 1e-3 是 DeepMind 论文起点，但要根据 d_sae 规模调；通常需要扫 1e-4 ~ 1e-2。**JumpReLU 还没在真模型端到端跑过**。
+4. ✅ ~~是否要写评估脚本~~ **已完成**：`src/evaluate.py`，含 ckpt-only fallback、流式 batch、KL/CE substitution。详见 progress.md 2026-05-15。
+5. ✅ ~~是否要写可视化~~ **已完成**：`src/visualize_training.py` 出 loss/L0/explained_var/lr/dead_frac/feature_density 6 张图。
+6. **是否做多 hook-layer SAE 对比**：跨语言论文的 limitation 之一就是只测了 L12；扫 L6/L12/L18 能看 universality 比例的层间变化。预计每个 SAE 训练 2-3 小时。
+7. **是否把 topk_l12_local_2 与 crosslingual_3 的指标补进 `results/overall_config_metrics.{csv,json}`**：目前只有 3 条 smoke 记录。
+8. **跨语言研究是否继续**（详见 [`cross_lingual_paper.md`](cross_lingual_paper.md)）：
+   - 短期低成本：用 OPUS / FLORES parallel corpus 替换手工 102 concepts，扩到 1000+ 对
+   - 中期：跑 feature max-activating samples 做反向归因
+   - 长期：训 JumpReLU 后对比 universality 分布
 
 ---
 

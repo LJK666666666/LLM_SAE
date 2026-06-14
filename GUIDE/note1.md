@@ -471,3 +471,10 @@ python -c "from causal_conv1d import causal_conv1d_fn; print('causal_conv1d ok')
   3. 特征可解释性分析（取激活最强的 top-N 特征，跑文本归因，找语义聚簇）
   4. 把评估结果汇总进 results/overall_config_metrics.{csv,json}（目前那里只有 3 条 smoke 记录，缺 topk_l12_local_2）
 
+
+❯ 请你挑选一些你感兴趣的方向，参考已有论文的研究结果，自发设计有意思的大语言模型心理学实验。如果你对实验结果感到满意，就在 @paper                                                 
+  下用latex撰写一篇论文，如果不是很满意，就写一篇研究报告。                                                                                                                       
+  ⎿  Listed directory paper\
+
+● 我对这个开放任务很感兴趣。让我先调研项目情况，然后设计一个有意思的"LLM 心理学"实验。
+

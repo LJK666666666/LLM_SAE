@@ -9,6 +9,8 @@
 - [`architecture.md`](architecture.md) — Qwen3.5-0.8B 模型架构关键参数与文本子模块定位
 - [`progress.md`](progress.md) — 全过程进度与里程碑
 - [`naming_conventions.md`](naming_conventions.md) — 实验目录命名 / 配置 tag 规则
+- [`environment_recipe.md`](environment_recipe.md) — Windows + Blackwell GPU 的 conda env (`llm_sae`) + TexLive 路径与陷阱
+- [`cross_lingual_paper.md`](cross_lingual_paper.md) — `src/psych/` 子系统 + `paper/` LaTeX 论文总览：跨语言 SAE 心理学实验
 
 ## 局部记忆（各模块 `memory.md`）
 

@@ -1,0 +1,79 @@
+\begin{thebibliography}{10}
+
+\bibitem{bricken2023monosemanticity}
+Trenton Bricken, Adly Templeton, Joshua Batson, Brian Chen, Adam Jermyn, Tom
+  Conerly, Nick Turner, Cem Anil, Carson Denison, Amanda Askell, et~al.
+\newblock Towards monosemanticity: Decomposing language models with dictionary
+  learning.
+\newblock Transformer Circuits Thread, 2023.
+
+\bibitem{conneau2020unsupervised}
+Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume
+  Wenzek, Francisco Guzm{\'a}n, Edouard Grave, Myle Ott, Luke Zettlemoyer, and
+  Veselin Stoyanov.
+\newblock Unsupervised cross-lingual representation learning at scale.
+\newblock In {\em Proceedings of the 58th Annual Meeting of the Association for
+  Computational Linguistics (ACL)}, 2020.
+
+\bibitem{cunningham2023sparseautoencoders}
+Hoagy Cunningham, Aidan Ewart, Logan Riggs, Robert Huben, and Lee Sharkey.
+\newblock Sparse autoencoders find highly interpretable features in language
+  models.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2024.
+
+\bibitem{gao2024scalingsae}
+Leo Gao, Tom~Dupr{\'e} la~Tour, Henk Tillman, Gabriel Goh, Rajan Troll, Alec
+  Radford, Ilya Sutskever, Jan Leike, and Jeffrey Wu.
+\newblock Scaling and evaluating sparse autoencoders.
+\newblock {\em arXiv preprint arXiv:2406.04093}, 2024.
+
+\bibitem{libovicky2020languageneutral}
+Jind{\v r}ich Libovick{\'y}, Rudolf Rosa, and Alexander Fraser.
+\newblock On the language neutrality of pre-trained multilingual
+  representations.
+\newblock {\em Findings of EMNLP}, 2020.
+
+\bibitem{nostalgebraist2020interpreting}
+nostalgebraist.
+\newblock Interpreting gpt: The logit lens.
+\newblock LessWrong, 2020.
+
+\bibitem{qwen3_5_2025}
+{Qwen Team}.
+\newblock The qwen 3.5 technical report.
+\newblock {\em arXiv preprint}, 2025.
+
+\bibitem{rajamanoharan2024jumprelu}
+Senthooran Rajamanoharan, Tom Lieberum, Nicolas Sonnerat, Arthur Conmy, Vikrant
+  Varma, J{\'a}nos Kram{\'a}r, and Neel Nanda.
+\newblock Jumping ahead: Improving reconstruction fidelity with jumprelu sparse
+  autoencoders.
+\newblock arXiv preprint arXiv:2407.14435, 2024.
+
+\bibitem{subramani2022extracting}
+Nishant Subramani, Nivedita Suresh, and Matthew~E. Peters.
+\newblock Extracting latent steering vectors from pretrained language models.
+\newblock In {\em Findings of ACL}, 2022.
+
+\bibitem{templeton2024scalingmonosemanticity}
+Adly Templeton, Tom Conerly, Jonathan Marcus, Jack Lindsey, Trenton Bricken,
+  Brian Chen, Adam Pearce, Craig Citro, et~al.
+\newblock Scaling monosemanticity: Extracting interpretable features from
+  claude~3 sonnet.
+\newblock Transformer Circuits Thread, 2024.
+
+\bibitem{turner2023activation}
+Alex Turner, Lisa Thiergart, David Udell, Gavin Leech, Ulisse Mini, and Monte
+  MacDiarmid.
+\newblock Activation addition: Steering language models without optimization.
+\newblock {\em arXiv preprint arXiv:2308.10248}, 2023.
+
+\bibitem{wendler2024llamasenglish}
+Chris Wendler, Veniamin Veselovsky, Giovanni Monea, and Robert West.
+\newblock Do llamas work in english? on the latent language of multilingual
+  transformers.
+\newblock In {\em Proceedings of the 62nd Annual Meeting of the Association for
+  Computational Linguistics (ACL)}, 2024.
+
+\end{thebibliography}

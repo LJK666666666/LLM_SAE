@@ -1,0 +1,96 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{bricken2023monosemanticity}
+\citation{cunningham2023sparseautoencoders}
+\citation{gao2024scalingsae}
+\citation{templeton2024scalingmonosemanticity}
+\citation{templeton2024scalingmonosemanticity}
+\citation{wendler2024llamasenglish}
+\citation{conneau2020unsupervised}
+\citation{templeton2024scalingmonosemanticity}
+\citation{qwen3_5_2025}
+\citation{gao2024scalingsae}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{bricken2023monosemanticity}
+\citation{cunningham2023sparseautoencoders}
+\citation{gao2024scalingsae}
+\citation{templeton2024scalingmonosemanticity}
+\citation{conneau2020unsupervised}
+\citation{wendler2024llamasenglish}
+\citation{libovicky2020languageneutral}
+\citation{turner2023activation}
+\citation{subramani2022extracting}
+\citation{templeton2024scalingmonosemanticity}
+\@writefile{toc}{\contentsline {paragraph}{Research questions.}{2}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Contributions.}{2}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{SAEs as model microscopes.}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-lingual representations.}{2}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concept steering.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}SAE Training and Quality}{2}{section.3}\protected@file@percent }
+\newlabel{sec:sae_quality}{{3}{2}{SAE Training and Quality}{section.3}{}}
+\citation{gao2024scalingsae}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces SAE reconstruction quality on held-out fineweb-edu, L0 fixed at $32$.}}{3}{table.caption.6}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:sae_quality}{{1}{3}{SAE reconstruction quality on held-out fineweb-edu, L0 fixed at $32$}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Method}{3}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Parallel Concept Probe Set}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Activation Collection}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Metrics}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concept-level cosine.}{3}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Per-feature correlation.}{3}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Feature typology.}{3}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Logit-lens semantic readout.}{4}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-lingual steering.}{4}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{4}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}RQ1: Concept-level cross-lingual consistency}{4}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Distribution of $\cos (Z_\text  {en}[i], Z_\text  {zh}[i])$ across $N{=}102$ concepts (blue), against a permutation null (red) where Chinese concepts are randomly re-assigned. The aligned distribution is reliably right-shifted ($z=37.7$).}}{4}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:concept_consistency}{{1}{4}{Distribution of $\cos (Z_\text {en}[i], Z_\text {zh}[i])$ across $N{=}102$ concepts (blue), against a permutation null (red) where Chinese concepts are randomly re-assigned. The aligned distribution is reliably right-shifted ($z=37.7$)}{figure.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}RQ2: Feature typology}{4}{subsection.5.2}\protected@file@percent }
+\citation{nostalgebraist2020interpreting}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Feature typology on the 489 active features. The cross-lingual correlation distribution is broad, with a substantial right tail ($\rho \geq 0.5$, 62 features) and almost no anti-aligned mass ($\rho \leq -0.2$, 1 feature).}}{5}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:classification}{{2}{5}{Feature typology on the 489 active features. The cross-lingual correlation distribution is broad, with a substantial right tail ($\rho \geq 0.5$, 62 features) and almost no anti-aligned mass ($\rho \leq -0.2$, 1 feature)}{figure.caption.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}RQ3: Semantic type breakdown}{5}{subsection.5.3}\protected@file@percent }
+\citation{bricken2023monosemanticity}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces $\log _{10}$ per-feature variance, English vs.\ Chinese, coloured by cross-lingual correlation. Diagonal mass is universal; off-diagonal tails are language-specific.}}{6}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:feature_var_scatter}{{3}{6}{$\log _{10}$ per-feature variance, English vs.\ Chinese, coloured by cross-lingual correlation. Diagonal mass is universal; off-diagonal tails are language-specific}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Logit-lens readout}{6}{subsection.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Top universal features by cross-lingual $\rho _j$, with their logit-lens top tokens. Notable: $\#10837$ mixes English and Chinese ``proportion'' words.}}{6}{table.caption.17}\protected@file@percent }
+\newlabel{tab:lens_examples}{{2}{6}{Top universal features by cross-lingual $\rho _j$, with their logit-lens top tokens. Notable: $\#10837$ mixes English and Chinese ``proportion'' words}{table.caption.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}RQ4: Cross-lingual steering}{6}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Per-category cross-lingual cosine (left, mean$\pm $std) and Jaccard of the top-20 features (right), sorted by cosine.}}{7}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:category_breakdown}{{4}{7}{Per-category cross-lingual cosine (left, mean$\pm $std) and Jaccard of the top-20 features (right), sorted by cosine}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Aggregated count of the top-20 logit-lens tokens (over top-30 features per class) by token kind. Universal features show a 24\% Chinese / 63\% English mixture, marginally more bilingual than the language-specific classes.}}{7}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:lens}{{5}{7}{Aggregated count of the top-20 logit-lens tokens (over top-30 features per class) by token kind. Universal features show a 24\% Chinese / 63\% English mixture, marginally more bilingual than the language-specific classes}{figure.caption.16}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{7}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What we (carefully) conclude.}{7}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What we cannot conclude.}{7}{section*.20}\protected@file@percent }
+\citation{templeton2024scalingmonosemanticity}
+\citation{wendler2024llamasenglish}
+\citation{gao2024scalingsae}
+\citation{rajamanoharan2024jumprelu}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Next-token KL divergence (vs.\ unsteered baseline, top-200) as a function of steering coefficient $\alpha $ for the top-3 universal features. Solid lines: English prompts. Dashed lines: Chinese prompts. The two languages track each other closely for each feature.}}{8}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:steering_kl}{{6}{8}{Next-token KL divergence (vs.\ unsteered baseline, top-200) as a function of steering coefficient $\alpha $ for the top-3 universal features. Solid lines: English prompts. Dashed lines: Chinese prompts. The two languages track each other closely for each feature}{figure.caption.18}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why might the signal be small?}{8}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Implications for SAE-based interpretability of small multilingual models.}{8}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Limitations}{8}{section.7}\protected@file@percent }
+\citation{templeton2024scalingmonosemanticity}
+\bibstyle{plain}
+\bibdata{refs}
+\bibcite{bricken2023monosemanticity}{1}
+\bibcite{conneau2020unsupervised}{2}
+\bibcite{cunningham2023sparseautoencoders}{3}
+\bibcite{gao2024scalingsae}{4}
+\bibcite{libovicky2020languageneutral}{5}
+\bibcite{nostalgebraist2020interpreting}{6}
+\bibcite{qwen3_5_2025}{7}
+\bibcite{rajamanoharan2024jumprelu}{8}
+\bibcite{subramani2022extracting}{9}
+\bibcite{templeton2024scalingmonosemanticity}{10}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{9}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{9}{section*.23}\protected@file@percent }
+\bibcite{turner2023activation}{11}
+\bibcite{wendler2024llamasenglish}{12}
+\gdef \@abspage@last{10}

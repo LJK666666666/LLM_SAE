@@ -38,3 +38,22 @@
 - [x] 语法检查通过：`python -m compileall src\data\corpora.py src\train.py src\training\trainer.py`
 - [x] 支持云端结果路径：`src/train.py` 新增 `--results-root`；`src/utils/exp_dir.py` 与 `src/utils/overall_metrics.py` 改为按指定 root 保存实验目录和 overall 指标；文档记录 Colab 推荐 `../drive/MyDrive/results`
 - [x] 支持本地固定子集：新增 `src/data/download_subset.py`，可从 HF streaming 下载固定中英文 train/val JSONL；`corpora.py` 支持本地 JSONL/TXT 按行循环读取和本地中英混合；新增 `configs/train_topk_local.yaml`
+
+## 2026-05-15（上一会话）
+
+- [x] 新建 conda env `llm_sae`（Python 3.11 + torch 2.11+cu128 + triton-windows 3.7 + fla 0.5 + transformers 5.8.1），解决 Blackwell sm_120 GPU 与 fla/triton 兼容问题。详见 [`environment_recipe.md`](environment_recipe.md)。
+- [x] 完成 `src/evaluate.py`（KL/CE substitution loss 评估，含 ckpt-only fallback 与流式 batch 处理避免 logits CPU 内存爆炸）+ `src/visualize_training.py`
+- [x] 对 `results/topk_l12_local_2/`（best.pt @ epoch 63）跑完完整评估：mix expl_var=0.8054，CE 恢复率 **98.04%**，几乎无 dead feature。结论：训练成功。
+
+## 2026-05-16
+
+- [x] **新增"跨语言 SAE 心理学"子系统** `src/psych/`：手工构造 102 中英平行概念 × 5 双语模板，对已训 SAE 跑 4 阶段实验：feature alignment / logit lens / steering / plotting。详见 [`cross_lingual_paper.md`](cross_lingual_paper.md)。
+- [x] 关键发现：aligned cos=0.605 vs perm=0.563（**z=37.7**），62 universal/38 EN-spec/107 ZH-spec features；steering KL vs α 曲线中英文同步；类别一致度 tech > food gap=0.025。
+- [x] 撰写技术报告风格 LaTeX 论文 `paper/main.tex`（10 页，pdflatex+bibtex 三轮编译 0 warning 0 error）。CJK 用 CJKutf8+\zh{} 宏。
+- [x] 用户决策依据：信号统计上强但绝对幅度小 → 写报告而非顶会论文，如实写 limitations。
+
+待用户后续选择性推进：
+- [ ] JumpReLU SAE 端到端真模型跑（代码已就绪，未跑过）
+- [ ] 训练结果汇总到 `results/overall_config_metrics.{csv,json}`（目前只有 3 条 smoke 记录，缺 topk_l12_local_2 与 crosslingual_3）
+- [ ] 多 hook-layer SAE 扫描（L6 / L12 / L18 对比 universal features 比例）
+- [ ] 特征-token 反向归因（跑长语料找每个 universal feature 的最强激活样本）

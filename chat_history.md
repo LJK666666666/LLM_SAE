@@ -372,3 +372,114 @@ Qwen3.5 在新环境里加载成功，hook 抓到 `[1, 8, 1024]` bf16 激活。
 
 你想先做哪一项？
 
+
+## 2026-05-16 #1
+
+**用户**：请你挑选一些你感兴趣的方向，参考已有论文的研究结果，自发设计有意思的大语言模型心理学实验。如果你对实验结果感到满意，就在 paper/ 下用 latex 撰写一篇论文，如果不是很满意，就写一篇研究报告。
+
+**实验方向选择**：基于已训 TopK SAE（L12, d_sae=16384, k=32），做 "Qwen3.5-0.8B 跨语言概念表征普适性" 的 SAE 心理学探针，覆盖 4 个 RQ：
+- RQ1 概念级 cos(z_en, z_zh)
+- RQ2 特征类型学（Universal / EN-spec / ZH-spec / Anti-aligned / Other / Dead）
+- RQ3 类别分项（13 类 × 102 概念）
+- RQ4 跨语言 steering 因果证据
+
+**新增代码**：
+- `data/psych/concepts.json`：102 个中英平行概念 + 5 套双语模板
+- `src/psych/crosslingual_features.py`：概念-特征对齐分析（cos、Jaccard、特征 corr、分类）
+- `src/psych/analyze_universal_features.py`：logit lens 解读 universal/lang-specific features
+- `src/psych/crosslingual_steering.py`：加法 steering 实验（α ∈ {0,4,12,30}）
+- `src/psych/plot_crosslingual.py`：7 张论文图
+
+**关键发现**：
+- 概念级 aligned cos=0.605 vs permutation=0.563（z=37.7，强显著）
+- Feature typology：62 Universal / 38 EN-spec / 107 ZH-spec / 1 Anti / 283 Other / 15895 Dead（仅 489 active 在我的探针上）
+- 类别一致度：tech/action/concrete-noun 最高，food/role 最低（gap 0.025）
+- Steering：top-3 universal features 在中英文 prompt 上 KL vs α 曲线高度一致
+
+**产物**：`paper/main.tex`（~27KB）+ `paper/refs.bib` + `paper/main.pdf`（10 页）+ `paper/figures/*.png`（7 张）+ `results/crosslingual_3/`（原始指标 + activations.pt + 7 张副本图）。
+LaTeX 编译通过（pdflatex + bibtex 三轮，0 warning，0 error）。
+
+**判断**：信号统计上强（z=37.7），但绝对幅度小（cos 仅高 0.04）；中间层 logit lens 较噪声；α≥12 steering 破坏流畅性。属于 "有发现但非震撼" → 写成技术报告/短论文风格（不投顶会但全文 self-contained），如实写出 limitations。
+
+---
+## 2026-06-14 15:08:13
+
+### 用户提示
+
+/update-memory
+
+### 工作内容
+
+**工具调用**: Readx6, Editx5, Writex2, Bashx1, Globx1
+
+inbox 不存在 → 跳过 Step 1-3，直接进 self-audit。先读现有 memory 文件了解当前状态。
+
+读完现有 memory。本次会话产生大量新内容（跨语言实验子系统、论文、conda env 路径、CJK LaTeX 技巧），且 user.md 严重过时（5.1 节"待用户决策"中"是否要写评估脚本"等都已完成）。本次会话**没有 inbox 条目**，但有大量本应进入的内容。
+
+**Self-audit 发现的遗漏**：
+
+1. ❌ 整个 `src/psych/` + `paper/` 子系统**完全没在 memory 里**
+2. ❌ `llm_sae` conda env 路径（关键！上一会话搭建的，本次首次正式跑跨语言实验都依赖它）
+3. ❌ TexLive 路径 + CJK LaTeX 技巧（编译多语言 paper 必备）
+4. ❌ 实验关键 magic number（min_max_mean=0.001、corr 阈值 0.5/-0.2、lang_specific_ratio=8.0、α 甜蜜点=4）
+5. ❌ progress.md 缺 2026-05-16 整轮
+6. ❌ user.md 5.4/5.5 待办（evaluate.py、可视化）**已完成**但还显示为待办
+
+按 [misc] 直接写 memory 文件，不绕 inbox。
+
+现在更新 `progress.md` 与 `user.md`，并更新 `index.md`。
+
+更新 `user.md`：标记已完成的待办 + 加 conda env 路径 + 加跨语言实验命令。
+
+继续修 user.md 的过时部分（5.4/5.5 已完成的待办，并加跨语言实验命令）。
+
+更新 index.md。
+
+检查是否需要创建 inbox 模板/归档脚本（看用户是否需要 inbox 文件）。
+
+## /update-memory 汇报
+
+### 处理类型：**无 inbox 条目 → 走 Self-audit 流程**
+
+`_memory/_inbox.md` 不存在，跳过 Step 1-3。Self-audit 发现本会话有**大量本应进 memory 但完全没记**的内容（这是 inbox-free 流程下最容易漏的：边干边没记，整理时容易直接放过去）。
+
+### Self-audit 捕获并写入的遗漏
+
+**两个新建 topic 文件**：
+
+1. **`_memory/cross_lingual_paper.md`** — `src/psych/` + `paper/` 子系统总览
+   - 4 个 RQ + 5 脚本 + 标准跑通命令
+   - **关键 magic number 表**：min_max_mean=0.001（active 阈值，调试过：0.05 全归 dead）、corr_universal=0.5、corr_anti=-0.2、lang_specific_ratio=8.0、α 甜蜜点=4
+   - 关键数字：aligned cos=0.605 vs perm=0.563（z=37.7）、62/38/107 features 分类
+   - **被否决方案的依据**：为什么不用 OPUS、为什么不做 dataset activation max、为什么不用 PPL/topic-classifier 量化 steering
+   - 论文级别判断 + 不要 overclaim 的告诫
+
+2. **`_memory/environment_recipe.md`** — Windows + Blackwell GPU 环境配方
+   - conda env `llm_sae` 全路径 + 关键包版本（torch 2.11+cu128, triton-windows 3.7.0.post26, fla 0.5.0, transformers 5.8.1）
+   - **必须用新 env 的根本原因**（Blackwell sm_120 + fla/triton 兼容）
+   - 创建步骤（防丢失）
+   - TexLive 路径 + CJK LaTeX 技巧（`\zh{...}` 宏 + CJKutf8）
+   - **4 个 pitfall 记录**：bash backtick 吃文件名、cd src 路径错误、triton 版本症状、exp_dir.py 函数名陷阱
+
+**两个已存在文件追加内容**：
+
+3. **`_memory/progress.md`** — 追加 2026-05-15（上一会话 evaluate.py + llm_sae env）和 2026-05-16（本会话跨语言子系统 + paper）整轮，更新 TODO 列表
+4. **`_memory/user.md`** —
+   - §0 加 conda env 路径 + TexLive
+   - §1 新增 1.7-1.10 四组运行命令（evaluate / visualize / 跨语言四阶段 / LaTeX 编译）
+   - §5 把 4 + 5 待办标 ✅ 已完成，新增 #6（多层扫描）/ #7（汇总 metrics）/ #8（跨语言后续）
+
+**`_memory/index.md`** 加入两个新 topic 链接。
+
+### tag 改写 / 丢弃条目
+
+无（没有 inbox 可改）。
+
+### Step 5（清空 inbox）
+
+无需执行——本来就没有 inbox 文件。
+
+### 核对建议
+
+请扫 `_memory/cross_lingual_paper.md` 的"被否决方案"和"论文级别判断"两节，那是我代你下的判断（信号小→写报告而非顶会、不做 dataset activation max 因省时），不合意请直接改。
+
